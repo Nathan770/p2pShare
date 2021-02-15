@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements ConnectionSatutsC
 
     @Override
     public void getPeer(WifiP2pDevice[] wifiP2pDevice) {
-        Log.d(TAG, "getPeer: ");
+        Log.d(TAG, "getPeer: before" +wifiP2pDevice.toString());
         if (wifiP2pDevice != null){
             for (int i = 0; i < wifiP2pDevice.length; i++) {
                 Log.d(TAG, "getPeer: "+wifiP2pDevice[i].deviceName);

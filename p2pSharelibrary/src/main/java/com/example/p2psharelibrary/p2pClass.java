@@ -84,6 +84,7 @@ public class p2pClass {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
+        mManager.requestPeers(mChannel,peerListListener);
         mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
@@ -113,6 +114,7 @@ public class p2pClass {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
+        mManager.requestConnectionInfo(mChannel, connectionInfoListener);
         mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
