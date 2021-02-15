@@ -1,0 +1,3 @@
+include ':p2pSharelibrary'
+include ':app'
+rootProject.name = "p2pShare"
