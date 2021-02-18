@@ -7,5 +7,5 @@ public interface ConnectionSatutsCallBack {
     void connectionStatus(boolean connected);
     void getPeer(WifiP2pDevice[] wifiP2pDevice);
     void connectedStatus(String statue);
-    void messageReciever(String msg);
+    void messageReciever(byte[] arr,int arg);
 }

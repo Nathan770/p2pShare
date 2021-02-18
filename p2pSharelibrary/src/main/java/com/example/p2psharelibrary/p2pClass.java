@@ -195,8 +195,7 @@ public class p2pClass {
             switch (msg.what) {
                 case MESSAGE_READ:
                     byte[] readBuff = (byte[]) msg.obj;
-                    String tempMsg = new String(readBuff, 0, msg.arg1);
-                    connectionSatutsCallBack.messageReciever(tempMsg);
+                    connectionSatutsCallBack.messageReciever(readBuff,msg.arg1);
                     break;
             }
             return true;
@@ -265,7 +264,7 @@ public class p2pClass {
         @Override
         public void run() {
             Log.d(TAG, "SendReceive run: Start , socket = " + socket.toString());
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[6000000];
             int bytes;
 
             while (socket != null) {
