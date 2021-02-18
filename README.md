@@ -101,10 +101,10 @@ public class MainActivity extends AppCompatActivity implements ConnectionSatutsC
     }
 
     @Override
-    public void messageReciever(String msg) {
-        //your well receive your message her
+    public void messageReciever(byte[] arr,int arg) {
+        String msg = new String(arr, 0, arg);
         main2_TXT_message.setText(msg);
-      
+
     }
      
 }     		
