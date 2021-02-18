@@ -6,6 +6,9 @@ p2p library
 A library for p2p , you can send a bytes array.
 
 
+<img src="https://github.com/Nathan770/p2pShare/blob/master/p2pShareExplication.gif"  width="512">
+
+
 ## Setup 
 
 Step 1. Add the JitPack repository to your build.gradle file
