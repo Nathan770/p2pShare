@@ -26,10 +26,12 @@ public class WiFiDirectBroadcastReceiver extends android.content.BroadcastReceiv
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
+        Log.d("nathan", "onReceive: Brocast");
         if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
             int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
 
             if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
+
                 Toast.makeText(context, "Wifi is On", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(context, "Wifi is OFF", Toast.LENGTH_SHORT).show();

@@ -3,8 +3,10 @@ package com.example.p2psharelibrary;
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
@@ -40,6 +42,7 @@ public class p2pClass {
 
 
     private final Context context;
+    private final Intent intent;
 
     private WifiManager wifiManager;
     private WifiP2pManager mManager;
@@ -55,8 +58,11 @@ public class p2pClass {
     private ClientClass clientClass;
     private SendReceive sendReceive;
 
-    public p2pClass(Context context) {
+    private ConnectionSatutsCallBack connectionSatutsCallBack;
+
+    public p2pClass(Context context, Intent intent) {
         this.context = context;
+        this.intent = intent;
     }
 
     public void run() {
@@ -71,6 +77,10 @@ public class p2pClass {
             mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
             mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
             mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+
+            context.registerReceiver(mReceiver, mIntentFilter);
+
+            connectionSatutsCallBack = (ConnectionSatutsCallBack) context;
     }
 
     public void searchClient() {
@@ -84,16 +94,17 @@ public class p2pClass {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        mManager.requestPeers(mChannel,peerListListener);
         mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
                 Log.d(TAG, "onSuccess: Discovery Started");
+                connectionSatutsCallBack.discoverStatus(true,770);
             }
 
             @Override
             public void onFailure(int reason) {
                 Log.d(TAG, "onSuccess: Discovery Started failled "+reason);
+                connectionSatutsCallBack.discoverStatus(false,reason);
             }
         });
 
@@ -114,19 +125,18 @@ public class p2pClass {
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        mManager.requestConnectionInfo(mChannel, connectionInfoListener);
+
         mManager.connect(mChannel, config, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
                 Toast.makeText(context, "Connected to " + device.deviceName, Toast.LENGTH_SHORT).show();
-                ConnectionSatutsCallBack connectionSatutsCallBack = (ConnectionSatutsCallBack) context;
+
                 connectionSatutsCallBack.connectionStatus(true);
             }
 
             @Override
             public void onFailure(int reason) {
                 Toast.makeText(context, "Not Connected reason = " + reason, Toast.LENGTH_SHORT).show();
-                ConnectionSatutsCallBack connectionSatutsCallBack = (ConnectionSatutsCallBack) context;
                 connectionSatutsCallBack.connectionStatus(false);
             }
         });
@@ -153,8 +163,6 @@ public class p2pClass {
                     deviceArray[index] = device;
                     index++;
                 }
-
-                ConnectionSatutsCallBack connectionSatutsCallBack = (ConnectionSatutsCallBack) context;
                 connectionSatutsCallBack.getPeer(deviceArray);
             }
         }
@@ -164,16 +172,19 @@ public class p2pClass {
         @Override
         public void onConnectionInfoAvailable(WifiP2pInfo info) {
             final InetAddress groupOwnerAddress = info.groupOwnerAddress;
-
             if (info.groupFormed && info.isGroupOwner) {
                 Log.d(TAG, "onConnectionInfoAvailable: Host");
                 serverClass = new ServerClass();
                 serverClass.start();
+                connectionSatutsCallBack.connectedStatus("Host");
             } else if (info.groupFormed) {
                 Log.d(TAG, "onConnectionInfoAvailable: Client");
                 clientClass = new ClientClass(groupOwnerAddress);
                 clientClass.start();
+                connectionSatutsCallBack.connectedStatus("Client");
             }
+
+
         }
     };
 
@@ -185,6 +196,7 @@ public class p2pClass {
                 case MESSAGE_READ:
                     byte[] readBuff = (byte[]) msg.obj;
                     String tempMsg = new String(readBuff, 0, msg.arg1);
+                    connectionSatutsCallBack.messageReciever(tempMsg);
                     break;
             }
             return true;
@@ -253,7 +265,7 @@ public class p2pClass {
         @Override
         public void run() {
             Log.d(TAG, "SendReceive run: Start , socket = " + socket.toString());
-            byte[] buffer = new byte[6000000];
+            byte[] buffer = new byte[1024];
             int bytes;
 
             while (socket != null) {
